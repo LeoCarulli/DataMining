@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit as st
 import sqlite3
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
@@ -17,6 +16,8 @@ Adhere to these rules:
 - Most of queries are very simple. You don´t need to use subqueries or complex joins. Just use the tables that are necessary to answer the question.
 - Your replies should ONLY include SQL code. No additional text should be included in the response.
 - Replies should include all columns mentioned on the question. 
+- When a date question is made, you should always filter with the following format: `WHERE data_date = 'YYYY-MM-DD'`. 
+- NEVER use "project_start_date" or "project_end_date" columns for filtering unless strictly mentioned. They are not reliable for filtering.
 
 ### Input:
 Generate a SQL query that answers the question `{question}`.
@@ -41,12 +42,12 @@ CREATE TABLE kpi (
   KPI_End_Date STRING,
   Progress_to_Goal_to_date DOUBLE, 
   Reasons STRING,
-  Data_Date DATE -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  Data_Date STRING -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
   )
 ;
 
 CREATE TABLE operational_risk ( 
-  data_date TIMESTAMP, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  data_date STRING, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
   BU STRING, -- This is also known as Project for business purposes.
   operational_risk STRING,
   yes_or_no STRING,
@@ -61,7 +62,7 @@ CREATE TABLE retain_renew (
   reasons STRING)
 ;
 
-CREATE TABLE revenues_actuals ( 
+CREATE TABLE revenues ( 
   BU STRING, -- This is also known as Project for business purposes.
   data_date STRING, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
   revenue DOUBLE)
@@ -77,7 +78,7 @@ CREATE TABLE turnover (
 -- csa_projects.ebs_code can be joined with kpi.EBS_PROJECT_CODE
 -- csa_projects.ebs_code can be joined with risk_share.EBS_Project_ID
 -- csa_projects.ebs_code can be joined with operational_risk.BU
--- csa_projects.ebs_code can be joined with revenues_actuals.BU
+-- csa_projects.ebs_code can be joined with revenues.BU
 -- csa_projects.ebs_code can be joined with turnover.ebs_business_unit
 -- all tables can be joined by data_date except for csa_projects.
 

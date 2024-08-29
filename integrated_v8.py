@@ -16,8 +16,7 @@ Adhere to these rules:
 - Most of queries are very simple. You don´t need to use subqueries or complex joins. Just use the tables that are necessary to answer the question.
 - Your replies should ONLY include SQL code. No additional text should be included in the response.
 - Replies should include all columns mentioned on the question. 
-- When question inclues a date filter, always filter with "data_date" column *placing last day of that month*. Format as following example on January 2024: `WHERE data_date = '2024-01-31'`. 
-- Do not use between or CAST clauses for date filtering. Only use the format above.
+- When a date question is made, you should always filter with the following format: `WHERE data_date = 'YYYY-MM-DD'`. 
 - NEVER use "project_start_date" or "project_end_date" columns for filtering unless strictly mentioned. They are not reliable for filtering.
 
 

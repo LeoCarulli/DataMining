@@ -174,7 +174,7 @@ def main():
         st.session_state.chat_history = []
 
     # Path to your SQLite database file
-    db_path = "database/mi_base_de_datos.db"  # Fixed the path separator
+    db_path = r"D:\Maestria_Austral\11-TextMining\SQLcoderApp\database\mi_base_de_datos.db"  # Fixed the path separator
 
     # User input text box
     user_input = st.text_input("You: ", "")

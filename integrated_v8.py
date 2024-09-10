@@ -1,9 +1,11 @@
 import streamlit as st
+import os
 import sqlite3
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
 import sqlparse  # Importing the sqlparse library for SQL validation and formatting
 import re
+import pandas as pd
 
 # Define the chatbot template and model
 template = """ 
@@ -123,9 +125,11 @@ def execute_query(sql_query, db_path):
     try:
         cursor.execute(sql_query)
         results = cursor.fetchall()
-        return results
+        # Get column names from the cursor description
+        column_names = [description[0] for description in cursor.description]
+        return results, column_names
     except sqlite3.Error as e:
-        return f"An error occurred: {e}"
+        return f"An error occurred: {e}", None
     finally:
         conn.close()
 
@@ -148,7 +152,7 @@ def handle_conversation(user_input, context, db_path):
         # Validate the SQL query
         if is_valid_sql(sql_query):
             # Execute the SQL query to check for errors
-            execution_result = execute_query(sql_query, db_path)
+            execution_result, _ = execute_query(sql_query, db_path)
             if not isinstance(execution_result, str):  # No error
                 formatted_query = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
                 context += f"\nUser: {user_input}\nAI: {formatted_query}"
@@ -165,42 +169,52 @@ def handle_conversation(user_input, context, db_path):
 # Streamlit app structure
 def main():
     st.title("AI SQL Coder")
-    st.write("Welcome to the AI SQL Coder! Please enter the SQL query you would like to see:")
 
-    # Initialize session state variables for context and chat history
     if "context" not in st.session_state:
         st.session_state.context = ""
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # Path to your SQLite database file
-    db_path = r"D:\Maestria_Austral\11-TextMining\SQLcoderApp\database\mi_base_de_datos.db"  # Fixed the path separator
+    db_file = "mi_base_de_datos.db"
+    db_path = os.path.join(os.getcwd(), db_file)
 
-    # User input text box
     user_input = st.text_input("You: ", "")
 
     if user_input:
-        # Handle the conversation
         sql_query, st.session_state.context = handle_conversation(user_input, st.session_state.context, db_path)
         st.session_state.chat_history.append(f"You: {user_input}")
 
-        # Display the SQL query
-        st.session_state.chat_history.append(f"SQL Query: {sql_query}")
+        # Store SQL query in chat history with collapse functionality
+        query_display = f"SQL Query: {sql_query}"
+        st.session_state.chat_history.append(
+            {"type": "query", "content": query_display}
+        )
 
         if "Unable to generate a valid SQL query" in sql_query:
-            st.write(sql_query)  # Display generic error message
+            st.session_state.chat_history.append({"type": "error", "content": sql_query})
         else:
-            # Execute the SQL query on SQLite and get results
-            results = execute_query(sql_query, db_path)
-            if isinstance(results, str):  # Error message
-                st.session_state.chat_history.append(f"Error: {results}")
+            results, column_names = execute_query(sql_query, db_path)
+            if isinstance(results, str):
+                st.session_state.chat_history.append({"type": "error", "content": results})
             else:
-                st.session_state.chat_history.append(f"Results: {results}")
+                df = pd.DataFrame(results)
+                if isinstance(column_names, list):
+                    df.columns = column_names
+                st.session_state.chat_history.append({"type": "results", "content": df})
 
-    # Display chat history
+    # Display chat history with collapsible SQL query and table display
     if st.session_state.chat_history:
-        for i, message in enumerate(st.session_state.chat_history):
-            st.write(message)
+        for message in st.session_state.chat_history:
+            if isinstance(message, dict):
+                if message["type"] == "query":
+                    with st.expander("Show SQL Query"):
+                        st.write(message["content"])
+                elif message["type"] == "error":
+                    st.write(message["content"])
+                elif message["type"] == "results":
+                    st.dataframe(message["content"])
+            else:
+                st.write(message)
 
 if __name__ == "__main__":
     main()

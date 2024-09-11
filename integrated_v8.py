@@ -6,6 +6,10 @@ from langchain_core.prompts import ChatPromptTemplate
 import sqlparse  # Importing the sqlparse library for SQL validation and formatting
 import re
 import pandas as pd
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
 
 # Define the chatbot template and model
 template = """ 
@@ -89,10 +93,6 @@ CREATE TABLE turnover (
 Generate a SQL query to answer the question `{question}`:
 """
 
-# Initialize the AI model with the provided template
-model = OllamaLLM(model="sqlcoder")
-prompt = ChatPromptTemplate.from_template(template)
-chain = prompt | model
 
 # Function to handle conversation and generate SQL query
 def is_valid_sql(query):
@@ -133,8 +133,23 @@ def execute_query(sql_query, db_path):
     finally:
         conn.close()
 
-def handle_conversation(user_input, context, db_path):
-    max_attempts = 5
+def handle_conversation(user_input, context, db_path, max_attempts=5, chain=None):
+    if chain is None:
+        # Initialize the AI model with the provided template
+        model = OllamaLLM(
+            model="sqlcoder",
+            #num_gpu=1, # habilito el uso de GPU
+            num_ctx=4096, # Aumento el tamaño del contexto (por default es 2048)
+            num_predict=-1, # Dejo ilimitado el numero de tokens usados para predecir, en nuestro caso deberian ser siempre pocos
+            #repeat_last_n=-1, # -1 es igual al numero del contexto, este parametro no deberia cambiar nada
+            temperature=0.5, # por default es 0.8, en 0.5 le bajo la creatividad
+            tfs_z=1,
+            top_k=40, # default es 40, si lo bajo, baja la creatividad, si lo subo es mas creativo
+            top_p=0.5, # default 0.9, va en conjunto con top_k, si lo bajo, baja la creatividad, si lo subo es mas creativo
+        )
+        prompt = ChatPromptTemplate.from_template(template)
+        chain = prompt | model
+
     attempt = 0
     
     while attempt < max_attempts:
@@ -157,10 +172,15 @@ def handle_conversation(user_input, context, db_path):
                 formatted_query = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
                 context += f"\nUser: {user_input}\nAI: {formatted_query}"
                 return formatted_query, context
+            else:
+                logger.info(f"Attempt {attempt} failed. Error executing SQL query. {execution_result}")
+        else:
+            logger.info(f"Attempt {attempt} failed. Invalid SQL query generated.")
         
         # Increment the attempt counter
         attempt += 1
         context += f"\nUser: {user_input}\nAI: Attempt {attempt} failed. Trying again."
+        logger.info(f"Attempt {attempt} failed. Trying again.")
 
     # If maximum attempts reached, return a generic error message
     context += f"\nUser: {user_input}\nAI: Unable to generate a valid SQL query after {max_attempts} attempts. Please contact an administrator."
@@ -217,4 +237,5 @@ def main():
                 st.write(message)
 
 if __name__ == "__main__":
+    logger.info("Starting the Streamlit application...")
     main()

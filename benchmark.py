@@ -1,4 +1,5 @@
 import time
+import pandas as pd
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import OllamaLLM
@@ -19,47 +20,82 @@ expected_outputs = [
 db_path = "./mi_base_de_datos.db"
 
 
-def test_model(prompts, expected_outputs, db_path, chain):
+def test_model(prompts, expected_outputs, db_path, chain, max_attempts=5):
     responses_correct = 0
     responses_time = []
     
     for prompt, expected_output in zip(prompts, expected_outputs):
         start_time = time.time()
         print(prompt)
-        query, _ = handle_conversation(prompt, "", db_path, max_attempts=5, chain=chain)
+        query, _ = handle_conversation(prompt, "", db_path, max_attempts=max_attempts, chain=chain)
         if "Unable to generate a valid SQL query" in query:
             print(prompt, query)
         else:
             output, columns_names = execute_query(query, db_path)
-            stop_time = time.time()
             if output == expected_output:
                 responses_correct += 1
-            responses_time.append(stop_time - start_time)
             print(output)
+        stop_time = time.time()
+        responses_time.append(stop_time - start_time)
     
-    print(f"Correct responses: {responses_correct}/{len(prompts)}")
-    print(f"Average time for correct responses: {sum(responses_time) / len(responses_time)} sec")
-    print(f"Max time for correct responses: {max(responses_time)} sec")
-    print(f"Min time for correct responses: {min(responses_time)} sec")
+    return {
+        "Correct responses": f"{responses_correct}/{len(prompts)}",
+        "Average time for responses (sec)": int(sum(responses_time) / len(responses_time)),
+        "Max time for responses (sec)": int(max(responses_time)),
+        "Min time for responses (sec)": int(min(responses_time)),
+    }
         
 
-model_parameters = [
-        {"model": "sqlcoder"},
-    {
+ollama_params_baseline = {"model": "sqlcoder"}
+ollama_params_more_context = {
         "model": "sqlcoder",
-        "num_ctx": 4096,
+        "num_ctx": 4096*2,
         "num_predict": -1,
         "temperature":0.5,
         "tfs_z": 1,
         "top_k": 40,
         "top_p": 0.5,
     }
+ollama_params_more_temperature = {
+        "model": "sqlcoder",
+        "num_ctx": 4096*2,
+        "num_predict": -1,
+        "temperature":0.85,
+        "tfs_z": 1,
+        "top_k": 70,
+        "top_p": 0.8,
+    }
+ollama_params_less_temperature = {
+        "model": "sqlcoder",
+        "num_ctx": 4096*2,
+        "num_predict": -1,
+        "temperature":0.3,
+        "tfs_z": 1,
+        "top_k": 25,
+        "top_p": 0.3,
+    }
+
+model_parameters = [
+    {"name": "baseline", "ollamaparams": ollama_params_baseline, "test_params": {"max_attempts": 1}},
+    {"name": "more attemps", "ollamaparams": ollama_params_baseline, "test_params": {"max_attempts": 5}},
+    {"name": "more context", "ollamaparams": ollama_params_more_context, "test_params": {"max_attempts": 5}},
+    {"name": "more context and temperature", "ollamaparams": ollama_params_more_temperature, "test_params": {"max_attempts": 5}},
+    {"name": "more context and less temperature", "ollamaparams": ollama_params_less_temperature, "test_params": {"max_attempts": 5}},
 ]
 
-for model_parameter in model_parameters:
-    model = OllamaLLM(**model_parameter)
+results_df = pd.DataFrame()
+for params in model_parameters:
+    exp_name = params["name"]
+    print(f"Experiment name {exp_name}")
+    model = OllamaLLM(**params["ollamaparams"])
     prompt = ChatPromptTemplate.from_template(template)
     chain = prompt | model
-    print(model_parameter)
-    test_model(prompts, expected_outputs, db_path, chain)
-    print("\n\n\n")
+    print("Ollama paramas: ", params["ollamaparams"])
+    results = test_model(prompts, expected_outputs, db_path, chain, **params.get("test_params", {}))
+    results["ollama_params"] = params["ollamaparams"]
+    results_df[exp_name] = pd.Series(results)
+    print(results)
+    print("\n\n")
+
+print(results_df)
+results_df.to_csv("results.csv")

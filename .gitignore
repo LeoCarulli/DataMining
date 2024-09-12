@@ -4,3 +4,6 @@
 __pycache__
 .*.swp
 *.csv
+
+# Ignorar entornos virtuales (poner el de cada uno si necesita)
+myenvi/

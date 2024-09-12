@@ -228,7 +228,7 @@ def main():
         st.header("Chat History")
         chat_container = st.empty()
         with chat_container.container():
-            for message in st.session_state.chat_history:
+            for message in reversed(st.session_state.chat_history):
                 if isinstance(message, dict):
                     if message["type"] == "query":
                         with st.expander(f"Show SQL Query and Results for: {message['user_input'].upper()}"):

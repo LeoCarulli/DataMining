@@ -8,7 +8,7 @@ def initialize_model():
     model = OllamaLLM(
         model="sqlcoder",
         #num_gpu=1, # habilito el uso de GPU
-        #num_ctx=2*4096, # Aumento el tamaño del contexto (por default es 2048)
+        num_ctx=2*4096, # Aumento el tamaño del contexto (por default es 2048)
         #num_predict=-1, # Dejo ilimitado el numero de tokens usados para predecir, en nuestro caso deberian ser siempre pocos
         #repeat_last_n=-1, # -1 es igual al numero del contexto, este parametro no deberia cambiar nada           
         #temperature=0.3, #, # por default es 0.8, en 0.5 le bajo la creatividad

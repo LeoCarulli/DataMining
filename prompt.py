@@ -11,6 +11,7 @@ Adhere to these rules:
 - Replies should include all columns mentioned on the question. 
 - When a date question is made, you should always filter with the following format: `WHERE data_date = 'YYYY-MM-DD'`. 
 - NEVER use "project_start_date" or "project_end_date" columns for filtering. They are not reliable for filtering.
+- ONLY use data_date columns when filtering by date.
 
 
 ### Input:

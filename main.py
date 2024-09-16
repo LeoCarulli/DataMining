@@ -13,24 +13,87 @@ logging.basicConfig(level=logging.INFO,  # Cambiar el nivel a INFO para eliminar
                     format='%(levelname)s: %(message)s')  # Mensajes de log básicos
 logger = logging.getLogger()
 
+def transform_oracle_to_sqlite(query):
+    # Reemplazos comunes entre Oracle y SQLite3
+    replacements = [
+        # Conversión de TO_NUMBER a nada (asume que SQLite no lo necesita)
+        (r"to_number\(([^,]+),\s*'[^']+'\)", r"\1"),
+        (r"to_number\(([^)]+)\)", r"\1"),
+        
+        # Conversión de TO_DATE a 'YYYY-MM-DD' para SQLite
+        (r"to_date\(([^,]+),\s*'[^']+'\)", r"\1"),  # En algunos casos se puede necesitar manejar formatos
+        
+        # Cambios para CURRENT_TIMESTAMP o SYSDATE
+        (r"sysdate", r"CURRENT_TIMESTAMP"),
+        (r"current_date", r"DATE('now')"),
+        (r"current_timestamp", r"DATETIME('now')"),
+        
+        # Conversión de secuencias de Oracle a autoincremento en SQLite
+        (r"([a-zA-Z_]+)\.nextval", r"NULL"),  # SQLite utiliza AUTOINCREMENT en su lugar
+        
+        # Función NVL en Oracle a IFNULL en SQLite
+        (r"nvl\(([^,]+),\s*([^)]+)\)", r"IFNULL(\1, \2)"),
+        
+        # Funciones de concatenación en Oracle (||) a SQLite
+        (r"([a-zA-Z_]+)\s*\|\|\s*([a-zA-Z_]+)", r"\1 || \2"),
+        
+        # Reemplazo de tipos de datos
+        #(r"number", r"INTEGER"),  # SQLite usa INTEGER en lugar de NUMBER
+        (r"varchar2", r"TEXT"),   # SQLite usa TEXT en lugar de VARCHAR2
+        #(r"date", r"TEXT"),       # SQLite usa TEXT para representar fechas
+        #(r"timestamp", r"TEXT"),  # Similar con TIMESTAMP
+    ]
+    
+    # Aplicar los reemplazos
+    for pattern, replacement in replacements:
+        query = re.sub(pattern, replacement, query, flags=re.IGNORECASE)
+
+        # Detectar si la consulta contiene NULLS LAST
+    if "NULLS LAST" in query.upper():
+        # Reemplazar 'NULLS LAST' con un CASE WHEN para SQLite3
+        query = re.sub(
+            r"ORDER BY (.+?)\s+DESC NULLS LAST",
+            r"ORDER BY CASE WHEN \1 IS NULL THEN 1 ELSE 0 END, \1 DESC",
+            query,
+            flags=re.IGNORECASE
+        )
+    
+    # Cambiar TOP por LIMIT, ya que SQLite3 usa LIMIT
+    match = re.search(r"SELECT TOP (\d+)", query, re.IGNORECASE)
+    if match:
+        limit_value = match.group(1)
+        # Reemplazar TOP por LIMIT
+        query = re.sub(r"SELECT TOP \d+", f"SELECT", query, flags=re.IGNORECASE)
+        query += f" LIMIT {limit_value}"
+
+    
+    return query
+
 def handle_conversation(user_input, context, db_path, chain, max_attempts=5):
     attempt = 0
     
     while attempt < max_attempts:
         # Invocar el modelo AI para generar la consulta SQL
-        result = chain.invoke({"context": context, "question": user_input})
-        sql_query = re.sub(r"<.*?>", "", result.strip())
+        result = chain.invoke({"context": "", "question": user_input})
+        logger.debug(result)
+        sql_query = re.sub(r"<.>", "", result.strip())
         
         # Asegurarse de que solo se ejecute una consulta SQL
         parsed_queries = sqlparse.split(sql_query)
         if len(parsed_queries) > 1:
-            sql_query = parsed_queries[0]  # Tomar solo la primera consulta
+            print(parsed_queries)
             logger.info(f"Multiple queries detected. Only the first query will be executed.")
+            sql_query = parsed_queries[0]
         
+        sql_query = transform_oracle_to_sqlite(sql_query)
+        sql_query = sql_query.replace('`', '')
+        logger.debug(f" query post transform {sql_query}")
+
         # Validar la consulta SQL
         if is_valid_sql(sql_query):
             # Formatear la consulta SQL
             formatted_query = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
+            logger.debug(f" formatted query {formatted_query}")
             
             # Ejecutar la consulta SQL
             execution_result, _ = execute_query(formatted_query, db_path)
@@ -40,6 +103,7 @@ def handle_conversation(user_input, context, db_path, chain, max_attempts=5):
             else:
                 logger.error(f"Error executing SQL query: {execution_result}")
         else:
+            print(sql_query)
             logger.warning(f"Invalid SQL query generated.")
         
         # Incrementar el contador de intentos

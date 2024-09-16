@@ -7,6 +7,7 @@ logger = logging.getLogger()
 
 def execute_query(sql_query, db_path):
     """Executes the SQL query on the SQLite database."""
+    logger.debug(f"sql query \n {sql_query}")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
@@ -24,7 +25,7 @@ def execute_query(sql_query, db_path):
         return results, column_names
 
     except sqlite3.Error as e:
-        logger.error(f"Error de SQLite al ejecutar la consulta: {e}")
+        logger.error(f"Error de SQLite al ejecutar la consulta: {e},\n query: {sql_query}")
         return f"An error occurred: {e}", None
 
     finally:

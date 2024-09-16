@@ -18,58 +18,115 @@ Adhere to these rules:
 Generate a SQL query that answers the question `{question}`.
 This query will run on a database whose schema is represented in this string:
 
-CREATE TABLE csa_projects (
-  ebs_code STRING PRIMARY KEY, -- This is also known as Project for business purposes.
-  SVP STRING, -- Senior Vice President
-  NBD STRING, 
-  project_type STRING,
-  project_start_date STRING,
-  project_end_date STRING,
-  active INT -- It has a 1 when active, and a 0 if inactive.
-  )
-;
+CREATE TABLE IF NOT EXISTS "csa_projects" (
+"client_name" TEXT,
+  "client_id" TEXT,
+  "PROJECT_ID" TEXT,
+  "ebs_code" INTEGER, -- This is also known as Project for business purposes.
+  "project_name" TEXT,
+  "opportunity_name" TEXT,
+  "project_type" TEXT,
+  "project_type_abbreviation" TEXT,
+  "SVP" TEXT, -- Senior Vice President
+  "NBD" REAL,
+  "OPERATIONS_MANAGER" REAL,
+  "project_start_date" TEXT,
+  "project_end_date" TEXT,
+  "project_status" REAL,
+  "business_unit" TEXT,
+  "opportunity_stage_name" TEXT,
+  "active" INTEGER, -- It has a 1 when active, and a 0 if inactive.
+  "closing_date" TEXT
+);
 
-CREATE TABLE kpi (
-  EBS_PROJECT_CODE STRING, -- This is also known as Project for business purposes.
-  KPI_Goal DOUBLE,
-  KPI_Actual DOUBLE,
-  KPI_Name STRING,
-  KPI_Start_Date STRING,
-  KPI_End_Date STRING,
-  Progress_to_Goal_to_date DOUBLE, 
-  Reasons STRING,
-  Data_Date STRING -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
-  )
-;
+CREATE TABLE IF NOT EXISTS "kpi" (
+"EBS_PROJECT_CODE" INTEGER, -- This is also known as Project for business purposes.
+  "KPI_Goal" REAL,
+  "KPI_Actual" REAL,
+  "KPI_Name" TEXT,
+  "KPI_Start_Date" TEXT,
+  "KPI_End_Date" TEXT,
+  "Progress_to_Goal_to_date" TEXT,
+  "Access" TEXT,
+  "CRM" TEXT,
+  "Client_Data_To_Syneos" TEXT,
+  "Reporting_Frequency" TEXT,
+  "Department_Head" REAL,
+  "Reasons" REAL,
+  "Data_Date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "Reporting_period" TEXT,
+  "Client_Services" TEXT,
+  "Project_Category" TEXT
+);
 
-CREATE TABLE operational_risk ( 
-  data_date STRING, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
-  BU STRING, -- This is also known as Project for business purposes.
-  operational_risk STRING,
-  yes_or_no STRING,
-  reasons STRING)
-;
+CREATE TABLE IF NOT EXISTS "risk_share" (
+"Data_Date" TEXT,
+  "EBS_Project_ID" TEXT,
+  "Business_Line" TEXT,
+  "Actual_Pool" REAL,
+  "Earned" REAL,
+  "Act_Pct" REAL,
+  "Year" INTEGER,
+  "Timing" REAL,
+  "quarter" TEXT,
+  "Month_Recognized" TIMESTAMP,
+  "Sales_Ops" TEXT,
+  "Metric" TEXT
+);
 
-CREATE TABLE retain_renew ( 
-  data_date STRING, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
-  BU INT, -- This is also known as Project for business purposes.
-  customer_risk STRING,
-  rating INT, 
-  reasons STRING)
-;
+CREATE TABLE IF NOT EXISTS "operational_risk" (
+"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "BU" INTEGER, -- This is also known as Project for business purposes.
+  "operational_risk" TEXT,
+  "yes_or_no" TEXT,
+  "reasons" TEXT
+);
 
-CREATE TABLE revenues ( 
-  BU STRING, -- This is also known as Project for business purposes.
-  data_date STRING, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
-  revenue DOUBLE)
-;
+CREATE TABLE IF NOT EXISTS "retain_renew" (
+"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "BU" INTEGER, -- This is also known as Project for business purposes.
+  "customer_risk" TEXT,
+  "rating" REAL,
+  "reasons" TEXT
+);
 
-CREATE TABLE turnover ( 
-  data_date STRING, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
-  ebs_business_unit STRING, -- This is also known as Project for business purposes.
-  headcount INT,
-  new_employees INT,
-  terminations INT)
+CREATE TABLE IF NOT EXISTS "revenues" (
+"BU" INTEGER, -- This is also known as Project for business purposes.
+  "data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "revenue" REAL
+);
+
+CREATE TABLE IF NOT EXISTS "ic" (
+"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "F_Code" INTEGER,
+  "Business_Unit" TEXT,
+  "Period" TEXT,
+  "year" REAL,
+  "Plan_Status" TEXT,
+  "Amendments_Yr" REAL,
+  "Amendments_for_Target" REAL,
+  "Plan_Engagement_75" TEXT,
+  "Target_Earning" REAL,
+  "Actual_Earning" REAL,
+  "Actual_Payout" REAL,
+  "Earning_to_Originals" REAL,
+  "Earning_to_Original_Reason" TEXT,
+  "Comments" REAL
+);
+
+CREATE TABLE IF NOT EXISTS "trafficlight" (
+"BU" INTEGER,
+  "data_date" TEXT,
+  "colour" TEXT
+);
+
+CREATE TABLE IF NOT EXISTS "turnover" (
+"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "ebs_business_unit" INTEGER, -- This is also known as Project for business purposes.
+  "headcount" INTEGER,
+  "new_employees" INTEGER,
+  "terminations" INTEGER
+);
 
 -- csa_projects.ebs_code can be joined with kpi.EBS_PROJECT_CODE
 -- csa_projects.ebs_code can be joined with risk_share.EBS_Project_ID
@@ -90,57 +147,116 @@ Generate a SQL query to answer [QUESTION]{question}[/QUESTION]
 
 ### Database Schema
 The query will run on a database with the following schema:
-CREATE TABLE csa_projects (
-  ebs_code STRING PRIMARY KEY, -- This is also known as Project for business purposes.
-  SVP STRING, -- Senior Vice President
-  NBD STRING, 
-  project_start_date STRING,
-  project_end_date STRING,
-  active INT -- It has a 1 when active, and a 0 if inactive.
-  )
-;
 
-CREATE TABLE kpi (
-  EBS_PROJECT_CODE STRING, -- This is also known as Project for business purposes.
-  KPI_Goal DOUBLE,
-  KPI_Actual DOUBLE,
-  KPI_Name STRING,
-  KPI_Start_Date STRING,
-  KPI_End_Date STRING,
-  Progress_to_Goal_to_date DOUBLE, 
-  Reasons STRING,
-  Data_Date STRING -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
-  )
-;
+CREATE TABLE IF NOT EXISTS "csa_projects" (
+"client_name" TEXT,
+  "client_id" TEXT,
+  "PROJECT_ID" TEXT,
+  "ebs_code" INTEGER, -- This is also known as Project for business purposes.
+  "project_name" TEXT,
+  "opportunity_name" TEXT,
+  "project_type" TEXT,
+  "project_type_abbreviation" TEXT,
+  "SVP" TEXT, -- Senior Vice President
+  "NBD" REAL,
+  "OPERATIONS_MANAGER" REAL,
+  "project_start_date" TEXT,
+  "project_end_date" TEXT,
+  "project_status" REAL,
+  "business_unit" TEXT,
+  "opportunity_stage_name" TEXT,
+  "active" INTEGER, -- It has a 1 when active, and a 0 if inactive.
+  "closing_date" TEXT
+);
 
-CREATE TABLE operational_risk ( 
-  data_date STRING, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
-  BU STRING, -- This is also known as Project for business purposes.
-  operational_risk STRING,
-  yes_or_no STRING,
-  reasons STRING)
-;
+CREATE TABLE IF NOT EXISTS "kpi" (
+"EBS_PROJECT_CODE" INTEGER, -- This is also known as Project for business purposes.
+  "KPI_Goal" REAL,
+  "KPI_Actual" REAL,
+  "KPI_Name" TEXT,
+  "KPI_Start_Date" TEXT,
+  "KPI_End_Date" TEXT,
+  "Progress_to_Goal_to_date" TEXT,
+  "Access" TEXT,
+  "CRM" TEXT,
+  "Client_Data_To_Syneos" TEXT,
+  "Reporting_Frequency" TEXT,
+  "Department_Head" REAL,
+  "Reasons" REAL,
+  "Data_Date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "Reporting_period" TEXT,
+  "Client_Services" TEXT,
+  "Project_Category" TEXT
+);
 
-CREATE TABLE retain_renew ( 
-  data_date STRING, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
-  BU INT, -- This is also known as Project for business purposes.
-  customer_risk STRING,
-  rating INT, 
-  reasons STRING)
-;
+CREATE TABLE IF NOT EXISTS "risk_share" (
+"Data_Date" TEXT,
+  "EBS_Project_ID" TEXT,
+  "Business_Line" TEXT,
+  "Actual_Pool" REAL,
+  "Earned" REAL,
+  "Act_Pct" REAL,
+  "Year" INTEGER,
+  "Timing" REAL,
+  "quarter" TEXT,
+  "Month_Recognized" TIMESTAMP,
+  "Sales_Ops" TEXT,
+  "Metric" TEXT
+);
 
-CREATE TABLE revenues ( 
-  BU STRING, -- This is also known as Project for business purposes.
-  data_date STRING, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
-  revenue DOUBLE)
-;
+CREATE TABLE IF NOT EXISTS "operational_risk" (
+"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "BU" INTEGER, -- This is also known as Project for business purposes.
+  "operational_risk" TEXT,
+  "yes_or_no" TEXT,
+  "reasons" TEXT
+);
 
-CREATE TABLE turnover ( 
-  data_date STRING, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
-  ebs_business_unit STRING, -- This is also known as Project for business purposes.
-  headcount INT,
-  new_employees INT,
-  terminations INT)
+CREATE TABLE IF NOT EXISTS "retain_renew" (
+"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "BU" INTEGER, -- This is also known as Project for business purposes.
+  "customer_risk" TEXT,
+  "rating" REAL,
+  "reasons" TEXT
+);
+
+CREATE TABLE IF NOT EXISTS "revenues" (
+"BU" INTEGER, -- This is also known as Project for business purposes.
+  "data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "revenue" REAL
+);
+
+CREATE TABLE IF NOT EXISTS "ic" (
+"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "F_Code" INTEGER,
+  "Business_Unit" TEXT,
+  "Period" TEXT,
+  "year" REAL,
+  "Plan_Status" TEXT,
+  "Amendments_Yr" REAL,
+  "Amendments_for_Target" REAL,
+  "Plan_Engagement_75" TEXT,
+  "Target_Earning" REAL,
+  "Actual_Earning" REAL,
+  "Actual_Payout" REAL,
+  "Earning_to_Originals" REAL,
+  "Earning_to_Original_Reason" TEXT,
+  "Comments" REAL
+);
+CREATE TABLE IF NOT EXISTS "trafficlight" (
+"BU" INTEGER,
+  "data_date" TEXT,
+  "colour" TEXT
+);
+
+CREATE TABLE IF NOT EXISTS "turnover" (
+"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "ebs_business_unit" INTEGER, -- This is also known as Project for business purposes.
+  "headcount" INTEGER,
+  "new_employees" INTEGER,
+  "terminations" INTEGER
+);
+
 
 -- csa_projects.ebs_code can be joined with kpi.EBS_PROJECT_CODE
 -- csa_projects.ebs_code can be joined with risk_share.EBS_Project_ID

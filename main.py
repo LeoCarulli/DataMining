@@ -150,7 +150,8 @@ def main():
     json_path = os.path.join(os.getcwd(), "output_data.json")
 
     # Inicializar el modelo (el `chain`) cuando la aplicación se inicia
-    chain = initialize_model()
+    #chain = initialize_model()
+    chain = initialize_model("pxlksr/defog_sqlcoder-7b-2:F16")
     
     # Create a layout with two columns
     col1, col2 = st.columns([7, 3])

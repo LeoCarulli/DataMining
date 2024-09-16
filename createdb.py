@@ -118,7 +118,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS turnover (
                 )''')
 
 # Cargar datos desde el archivo Excel
-file_path = 'D:/Maestria_Austral/11-TextMining/SQLcoderApp/data/Anonimized_data.xlsx'
+file_path = './Anonimized_data.xlsx'
 
 # Diccionario de tablas y sus pestañas correspondientes
 tablas_y_hojas = {
@@ -140,7 +140,7 @@ for tabla, hoja in tablas_y_hojas.items():
     # Convertir las columnas de fecha al formato adecuado
     date_columns = [col for col in df.columns if 'date' in col.lower()]
     for col in date_columns:
-        df[col] = pd.to_datetime(df[col], errors='coerce').dt.strftime('%Y-%m-%d')
+        df[col] = pd.to_datetime(df[col], errors='coerce').dt.date
     
     # Cargar datos en la tabla correspondiente
     df.to_sql(tabla, conn, if_exists='replace', index=False)

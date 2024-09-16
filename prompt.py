@@ -37,11 +37,11 @@ CREATE TABLE IF NOT EXISTS "kpi" (
   "KPI_End_Date" TEXT,
   "Progress_to_Goal_to_date" TEXT,
   "Reasons" REAL,
-  "Data_Date" TEXT -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "Data_Date" DATE -- Date of the data. It´s always the last day of the month
 );
 
 CREATE TABLE IF NOT EXISTS "operational_risk" (
-"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+"data_date" DATE, -- Date of the data. It´s always the last day of the month
   "BU" INTEGER, -- This is also known as Project for business purposes.
   "operational_risk" TEXT,
   "yes_or_no" TEXT,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS "operational_risk" (
 );
 
 CREATE TABLE IF NOT EXISTS "retain_renew" (
-"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+"data_date" DATE, -- Date of the data. It´s always the last day of the month
   "BU" INTEGER, -- This is also known as Project for business purposes.
   "customer_risk" TEXT,
   "rating" REAL,
@@ -58,12 +58,12 @@ CREATE TABLE IF NOT EXISTS "retain_renew" (
 
 CREATE TABLE IF NOT EXISTS "revenues" (
 "BU" INTEGER, -- This is also known as Project for business purposes.
-  "data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "data_date" DATE, -- Date of the data. It´s always the last day of the month.
   "revenue" REAL
 );
 
 CREATE TABLE IF NOT EXISTS "turnover" (
-"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+"data_date" DATE, -- Date of the data. It´s always the last day of the month.
   "ebs_business_unit" INTEGER, -- This is also known as Project for business purposes.
   "headcount" INTEGER,
   "new_employees" INTEGER,
@@ -109,11 +109,11 @@ CREATE TABLE IF NOT EXISTS "kpi" (
   "KPI_End_Date" TEXT,
   "Progress_to_Goal_to_date" TEXT,
   "Reasons" REAL,
-  "Data_Date" TEXT -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "Data_Date" DATE -- Date of the data. It´s always the last day of the month
 );
 
 CREATE TABLE IF NOT EXISTS "operational_risk" (
-"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+"data_date" DATE, -- Date of the data. It´s always the last day of the month
   "BU" INTEGER, -- This is also known as Project for business purposes.
   "operational_risk" TEXT,
   "yes_or_no" TEXT,
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS "operational_risk" (
 );
 
 CREATE TABLE IF NOT EXISTS "retain_renew" (
-"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+"data_date" DATE, -- Date of the data. It´s always the last day of the month
   "BU" INTEGER, -- This is also known as Project for business purposes.
   "customer_risk" TEXT,
   "rating" REAL,
@@ -130,12 +130,12 @@ CREATE TABLE IF NOT EXISTS "retain_renew" (
 
 CREATE TABLE IF NOT EXISTS "revenues" (
 "BU" INTEGER, -- This is also known as Project for business purposes.
-  "data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+  "data_date" DATE, -- Date of the data. It´s always the last day of the month.
   "revenue" REAL
 );
 
 CREATE TABLE IF NOT EXISTS "turnover" (
-"data_date" TEXT, -- Date of the data. It´s always the last day of the month in format YYYY-MM-DD.
+"data_date" DATE, -- Date of the data. It´s always the last day of the month.
   "ebs_business_unit" INTEGER, -- This is also known as Project for business purposes.
   "headcount" INTEGER,
   "new_employees" INTEGER,

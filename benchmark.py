@@ -134,11 +134,11 @@ ollama_params_less_temperature = {
 
 model_parameters = [
     #{"name": "baseline", "ollamaparams": ollama_params_baseline, "test_params": {"max_attempts": 1}},
-    #{"name": "more attemps", "ollamaparams": ollama_params_baseline, "test_params": {"max_attempts": 5}},
-    #{"name": "more context", "ollamaparams": ollama_params_more_context, "test_params": {"max_attempts": 5}},
-    #{"name": "more context and temperature", "ollamaparams": ollama_params_more_temperature, "test_params": {"max_attempts": 5}},
-    #{"name": "more context and less temperature", "ollamaparams": ollama_params_less_temperature, "test_params": {"max_attempts": 5}},
-    {"name": "model 7b-2", "ollamaparams": ollama_params_baseline_better_model, "test_params": {"max_attempts": 5}},
+    {"name": "more attemps", "ollamaparams": ollama_params_baseline, "test_params": {"max_attempts": 5}},
+    {"name": "more context", "ollamaparams": ollama_params_more_context, "test_params": {"max_attempts": 5}},
+    {"name": "more context and temperature", "ollamaparams": ollama_params_more_temperature, "test_params": {"max_attempts": 5}},
+    {"name": "more context and less temperature", "ollamaparams": ollama_params_less_temperature, "test_params": {"max_attempts": 5}},
+    #{"name": "model 7b-2", "ollamaparams": ollama_params_baseline_better_model, "test_params": {"max_attempts": 5}},
 ]
 
 results_df = pd.DataFrame()
@@ -146,8 +146,8 @@ for params in model_parameters:
     exp_name = params["name"]
     print(f"Experiment name {exp_name}")
     model = OllamaLLM(**params["ollamaparams"])
-    #prompt = ChatPromptTemplate.from_template(template)
-    prompt = ChatPromptTemplate.from_template(prompt_7b_2)
+    prompt = ChatPromptTemplate.from_template(template)
+    #prompt = ChatPromptTemplate.from_template(prompt_7b_2)
     chain = prompt | model
     print("Ollama paramas: ", params["ollamaparams"])
     results = test_model(prompts, expected_outputs, db_path, chain, **params.get("test_params", {}))

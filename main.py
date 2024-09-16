@@ -3,15 +3,31 @@ import pandas as pd
 import streamlit as st
 import logging
 import sqlparse
+import sqlglot
 import re
 from model_config import initialize_model  # Asegúrate de importar initialize_model
 from validation import is_valid_sql
-from execution import execute_query
+from execution import execute_query, execute_query_json
 
 # Configuración básica de logging
-logging.basicConfig(level=logging.INFO,  # Cambiar el nivel a INFO para eliminar DEBUG
+logging.basicConfig(level=logging.DEBUG,  # Cambiar el nivel a INFO para eliminar DEBUG
                     format='%(levelname)s: %(message)s')  # Mensajes de log básicos
 logger = logging.getLogger()
+
+def convert_postgres_to_sqlite(query: str) -> str:
+    # 1. Convertir EXTRACT para fechas a strftime
+    query = re.sub(r"EXTRACT\(YEAR FROM (\w+)\)", r"strftime('%Y', \1)", query)
+    query = re.sub(r"EXTRACT\(MONTH FROM (\w+)\)", r"strftime('%m', \1)", query)
+
+    # 2. Convertir los operadores de tipo ::DATE, ::INTEGER, etc. (eliminarlos)
+    query = re.sub(r"::\w+", "", query)
+
+    # 3. Convertir funciones y operadores no compatibles
+    query = query.replace("ILIKE", "LIKE")  # SQLite no soporta ILIKE, usar LIKE
+    query = re.sub(r"SERIAL", "INTEGER PRIMARY KEY AUTOINCREMENT", query)  # Convertir SERIAL a autoincrement
+
+    return query
+
 
 def transform_oracle_to_sqlite(query):
     # Reemplazos comunes entre Oracle y SQLite3
@@ -69,7 +85,7 @@ def transform_oracle_to_sqlite(query):
     
     return query
 
-def handle_conversation(user_input, context, db_path, chain, max_attempts=5):
+def handle_conversation(user_input, context, db_path, chain, max_attempts=5, json_path="output_data.json"):
     attempt = 0
     
     while attempt < max_attempts:
@@ -85,18 +101,22 @@ def handle_conversation(user_input, context, db_path, chain, max_attempts=5):
             logger.info(f"Multiple queries detected. Only the first query will be executed.")
             sql_query = parsed_queries[0]
         
-        sql_query = transform_oracle_to_sqlite(sql_query)
+        #sql_query = transform_oracle_to_sqlite(sql_query)
+        #sql_query = convert_postgres_to_sqlite(sql_query)
         sql_query = sql_query.replace('`', '')
         logger.debug(f" query post transform {sql_query}")
 
         # Validar la consulta SQL
         if is_valid_sql(sql_query):
+            # transpilo el sql a mysql
+            formatted_query = sqlglot.transpile(sql_query, write="mysql")[0]
             # Formatear la consulta SQL
             formatted_query = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
             logger.debug(f" formatted query {formatted_query}")
             
             # Ejecutar la consulta SQL
-            execution_result, _ = execute_query(formatted_query, db_path)
+            #execution_result, _ = execute_query(formatted_query, db_path)
+            execution_result, _ = execute_query_json(formatted_query, json_path)
             if not isinstance(execution_result, str):  # La consulta fue exitosa
                 context += f"\nUser: {user_input}\nAI: {formatted_query}"
                 return formatted_query, context
@@ -127,6 +147,7 @@ def main():
 
     db_file = "mi_base_de_datos.db"
     db_path = os.path.join(os.getcwd(), db_file)
+    json_path = os.path.join(os.getcwd(), "output_data.json")
 
     # Inicializar el modelo (el `chain`) cuando la aplicación se inicia
     chain = initialize_model()
@@ -149,7 +170,7 @@ def main():
     #user_input = st.text_input("You: ", "", placeholder="Haz tu pregunta aquí...")
 
     if user_input:
-        sql_query, st.session_state.context = handle_conversation(user_input, st.session_state.context, db_path, chain)
+        sql_query, st.session_state.context = handle_conversation(user_input, st.session_state.context, db_path, chain, json_path=json_path)
 
         # Store SQL query in chat history with collapse functionality
         query_display = f"SQL Query: {sql_query}"
@@ -160,7 +181,8 @@ def main():
         if "Unable to generate a valid SQL query" in sql_query:
             st.session_state.chat_history.append({"type": "error", "content": sql_query})
         else:
-            results, column_names = execute_query(sql_query, db_path)
+            #results, column_names = execute_query(sql_query, db_path)
+            results, column_names = execute_query_json(sql_query, json_path)
             if isinstance(results, str):
                 st.session_state.chat_history.append({"type": "error", "content": results})
             else:
@@ -168,9 +190,6 @@ def main():
                 if isinstance(column_names, list) and len(results) > 0: 
                     df.columns = column_names
                 st.session_state.chat_history.append({"type": "results", "content": df})
-
-    
-    
 
     # Display chat history with collapsible SQL query and table display inside a scrollable box
     if st.session_state.chat_history:

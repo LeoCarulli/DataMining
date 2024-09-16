@@ -87,8 +87,13 @@ def main():
                 st.session_state.chat_history.append({"type": "error", "content": results})
             else:
                 df = pd.DataFrame(results)
-                if isinstance(column_names, list):
+
+                # Solo asignar los nombres de columna si los resultados tienen columnas
+                if df.shape[1] > 0 and isinstance(column_names, list) and len(column_names) == df.shape[1]:
                     df.columns = column_names
+                else:
+                    logger.warning("El número de columnas en los resultados no coincide con el número de nombres de columnas.")
+
                 st.session_state.chat_history.append({"type": "results", "content": df})
 
     # Display chat history with collapsible SQL query and table display inside a scrollable box

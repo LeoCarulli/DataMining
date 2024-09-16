@@ -7,7 +7,7 @@ cursor = conn.cursor()
 
 # Consulta SQL que deseas ejecutar
 sql_query = """
-SELECT cp.ebs_code, SUM(r.revenue) AS total_revenue FROM csa_projects cp JOIN revenues r ON cp.ebs_code = r.bu GROUP BY cp.ebs_code ORDER BY total_revenue DESC NULLS LAST LIMIT 5;
+SELECT cp.ebs_code, MAX(r.revenue) AS total_revenue FROM csa_projects cp JOIN revenues r ON cp.ebs_code = r.bu GROUP BY cp.ebs_code ORDER BY total_revenue DESC NULLS LAST LIMIT 5;
 """  # Reemplaza 'my_table' con el nombre de tu tabla
 
 # Ejecutar la consulta

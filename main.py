@@ -188,7 +188,7 @@ def main():
                 st.session_state.chat_history.append({"type": "error", "content": results})
             else:
                 df = pd.DataFrame(results)
-                if isinstance(column_names, list) and len(results) > 0: 
+                if isinstance(column_names, (list, tuple)) and len(results) > 0: 
                     df.columns = column_names
                 st.session_state.chat_history.append({"type": "results", "content": df})
 

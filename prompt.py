@@ -22,6 +22,7 @@ CREATE TABLE csa_projects (
   ebs_code STRING PRIMARY KEY, -- This is also known as Project for business purposes.
   SVP STRING, -- Senior Vice President
   NBD STRING, 
+  project_type STRING,
   project_start_date STRING,
   project_end_date STRING,
   active INT -- It has a 1 when active, and a 0 if inactive.

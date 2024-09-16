@@ -109,9 +109,9 @@ def handle_conversation(user_input, context, db_path, chain, max_attempts=5, jso
         # Validar la consulta SQL
         if is_valid_sql(sql_query):
             # transpilo el sql a mysql
-            formatted_query = sqlglot.transpile(sql_query, write="mysql")[0]
+            formatted_query = sqlglot.transpile(sql_query, write="mysql", pretty=True)[0]
             # Formatear la consulta SQL
-            formatted_query = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
+            #formatted_query = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
             logger.debug(f" formatted query {formatted_query}")
             
             # Ejecutar la consulta SQL

@@ -21,7 +21,7 @@ prompts = [
     "what active projects are owned by SVP_Anon_7",
     "show me the all kpi data for SVP called SVP_Anon_3 on march 2024",
     "Which are the proyects with more than 2 terminations on may 2024?",
-    "Show me all KPI información for Project 71 on November 2023",
+    "Show me all KPI information for Project 71 on November 2023",
     "distinct svp names",
     "headcount sum of project 211 on may 31 2024",
     "total clients of SVP_Anon_3",

@@ -11,6 +11,7 @@ Adhere to these rules:
 - Replies should include all columns mentioned on the question. 
 - When a date question is made, you should always filter with the following format: `WHERE data_date = 'YYYY-MM-DD'`. 
 - NEVER use "project_start_date" or "project_end_date" columns for filtering. They are not reliable for filtering.
+- ONLY use data_date columns when filtering by date.
 
 
 ### Input:
@@ -21,6 +22,7 @@ CREATE TABLE csa_projects (
   ebs_code STRING PRIMARY KEY, -- This is also known as Project for business purposes.
   SVP STRING, -- Senior Vice President
   NBD STRING, 
+  project_type STRING,
   project_start_date STRING,
   project_end_date STRING,
   active INT -- It has a 1 when active, and a 0 if inactive.

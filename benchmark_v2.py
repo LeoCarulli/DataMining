@@ -20,6 +20,11 @@ prompts = [
     "show me the all kpi data for SVP called SVP_Anon_3 on march 2024",
     "Which are the proyects with more than 2 terminations on may 2024?",
     "Show me all KPI información for Project 71 on November 2023",
+    "distinct svp names",
+    "headcount sum of project 211 on may 31 2024",
+    "total clients of SVP_Anon_3",
+    "show the project name of code number 32",
+    "distinct project type ordered alfabetical",
     ]
 
 expected_outputs = [
@@ -27,12 +32,20 @@ expected_outputs = [
     [(211,)],
     [(476, 683742633.0730001), (211, 96336030.4), (179, 89112550.81), (253, 88720715.99), (239, 62698358.9)],
     [(151, -101052.69), (343, -69716.18), (387, -54306.0), (394, -22603.3), (293, -11474.61)],
-    [(735116.337)],
+    [(735116.337,)],
     [(285, 17), (179, 14), (253, 11), (239, 7), (280, 5)],
     [(3),(89),(90),(95),(97),(114),(120),(123),(136),(170),(209),(235),(239),(279),(282),(316),(359),(373),(376),(431),(440),(475)],
     [(201, 5.0, 6.9, 'KPI #2 Operations - Calls per day - >= 5 = 100; <5 calls = 0', '2024-01-01', '2024-03-31', '1970-01-01', 'Yes', 'SH', 'No', 'Weekly', None, None, '2024-03-31', '2024-Q1', 'Audrey Herrera', 'Maintain & Grow'), (201, 1.0, 0.95, 'KPI #1 Sales - TRx Cycles - Target >= 42,832 for Q1 = 100; <= 0', '2024-01-01', '2024-03-31', '1970-01-01', 'Yes ', 'SH', 'No', 'Weekly', None, None, '2024-03-31', '2024-Q1', 'Audrey Herrera', 'Maintain & Grow'), (404, 30.0, 30.0, 'Days to fill < 30 days', '2024-01-01', '2024-03-31', '1970-01-01', 'Yes - Syneos Health Roster', 'Client', 'No', 'Monthly', None, None, '2024-03-31', '2024-Q1', 'Jennifer Diaz', None), (404, 0.9, 0.95, '90 of ARMs minimum 3 days with in-person interactions over 85 weeks', '2024-01-01', '2024-03-31', '1970-01-01', 'Yes - Client CRM', 'Client', 'No', 'Weekly/Monthly', None, None, '2024-03-31', '2024-Q1', 'Jennifer Diaz', None), (404, 1.0, 1.0, 'ARMs post minimum of 10 account plans with goals by 1/26', '2024-01-01', '2024-03-31', '1970-01-01', 'Manager reporting', 'Client', 'No', 'Weekly/Monthly', None, None, '2024-03-31', '2024-Q1', 'Jennifer Diaz', None), (404, 1.0, 1.0, 'Minimum one meeting with sales matrix partner per month', '2024-01-01', '2024-03-31', '1970-01-01', 'Manager reporting', 'Client', 'No', 'Monthly', None, None, '2024-03-31', '2024-Q1', 'Jennifer Diaz', None), (404, 0.85, 0.89, 'Turnover <=3 per Quarter', '2024-01-01', '2024-03-31', '1970-01-01', 'Yes - Internal Reporting', 'Client', 'No', 'Monthly', None, None, '2024-03-31', '2024-Q1', 'Jennifer Diaz', None), (404, 0.9, 1.0, '90 of Team Minimum 8 In-Person at 85 of weeks', '2024-01-01', '2024-03-31', '1970-01-01', 'Yes - Client CRM', 'Client', 'No', 'Weekly/Monthly', None, None, '2024-03-31', '2024-Q1', 'Jennifer Diaz', None), (404, 0.85, 1.0, '85 of ARMs 1.5 Field Ride quarterly', '2024-01-01', '2024-03-31', '1970-01-01', 'No - Syneos Data', 'Client', 'No', 'Monthly', None, None, '2024-03-31', '2024-Q1', 'Jennifer Diaz', None), (410, 4.0, 8.0, 'Calls per day', '2024-01-01', '2024-12-31', '1970-01-01', 'Yes Internal Reporting/Veeva Output', 'Client', None, 'Weekly/Monthly', None, None, '2024-03-31', '2024-Q1', 'Daphne George', 'Drive Performance'), (410, 1.0, 0.8, 'Field Coaching Report completion', '2024-01-01', '2024-12-31', '1970-01-01', 'Yes Internal Reporting', 'Client', None, 'Quarterly', None, None, '2024-03-31', '2024-Q1', 'Daphne George', 'Drive Performance'), (410, 0.85, 0.94, 'Retention of FRM Team', '2024-01-01', '2024-12-31', '1970-01-01', 'Yes Internal Reporting', 'Client', None, 'Quarterly', None, None, '2024-03-31', '2024-Q1', 'Daphne George', 'Drive Performance'), (410, 0.7, 0.82, 'Reach on targeted customers', '2024-01-01', '2024-12-31', '1970-01-01', 'Yes Internal Reporting', 'Client', None, 'Weekly/Monthly', None, None, '2024-03-31', '2024-Q1', 'Daphne George', 'Drive Performance')],
     [(169,), (173,), (179,), (188,), (211,), (239,), (253,), (255,), (274,), (285,), (361,), (384,), (404,), (407,), (410,), (435,), (457,)] ,
     [('Average successful call/day', 10.0, 9.80000019073486), ('Average call attempts/day', 35.0, 33.9000015258789)],
+    [('SVP_Anon_3',), ('SVP_Anon_5',), ('SVP_Anon_7',), ('SVP_Anon_1',), ('SVP_Anon_6',), ('SVP_Anon_2',), ('SVP_Anon_4',)],
+    [(105,)],
+    [(52,)],
+    [('target enterprise web services',)],
+    [('Account Managers (Payer)',), ('Clinical Educators',), ('Clinical Educators/On Call Nurses',), ('Clinical Educators/On Call Nurses - MedA',), ('Clinical Educators/On call Nurses',), ('Engagement Center',), ('Fleet Only',), ('General Kinetic',), ('Medical Science Liaisons',), ('Ops Only',), ('REMS Engagement Center',), ('Recruiting Only',), ('Reimbursement/ Access',), ('Reimbursement/Access',), ('Sales Representatives',), (None,)],
+    
+
+
 
 ]
 

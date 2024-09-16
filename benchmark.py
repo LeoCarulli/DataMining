@@ -53,16 +53,21 @@ db_path = os.path.join(os.getcwd(), db_file)
 json_path = os.path.join(os.getcwd(), "output_data.json")
 
 
-def soft_equal(output, expected_output):
-
-    if len(output) != len(expected_output):
+def compare_tuples(expected_output, actual_output):
+    if len(expected_output) != len(actual_output):
         return False
 
-    for row, expected_row in zip(output, expected_output):
-        for expected_column in expected_row:
-            if expected_column not in row:
-                print(f"value: {expected_column} appears in expected output but not in output")
-                return False
+    for expected_row, actual_row in zip(expected_output, actual_output):
+        if len(expected_row) != len(actual_row):
+            return False
+
+        for expected_value, actual_value in zip(expected_row, actual_row):
+            if isinstance(expected_value, float) and isinstance(actual_value, float):
+                if int(expected_value) != int(actual_value):
+                    return False
+            else:
+                if expected_value != actual_value:
+                    return False
     return True
 
 
@@ -79,7 +84,7 @@ def test_model(prompts, expected_outputs, db_path, chain, max_attempts=5):
         else:
             #output, columns_names = execute_query(query, db_path)
             output, columns_names = execute_query_json(query, json_path)
-            if output == expected_output:
+            if compare_tuples(output, expected_output):
                 responses_correct += 1
             else:
                 print("Incorrect test")
